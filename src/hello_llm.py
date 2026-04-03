@@ -42,3 +42,4 @@ if __name__ == "__main__":
             console.print("[cyan]Goodbye! See you tomorrow for Day 2.[/cyan]")
             break
         chat_with_llm(user_input)
+
