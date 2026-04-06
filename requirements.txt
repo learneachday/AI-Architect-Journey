@@ -2,3 +2,5 @@ huggingface_hub
 python-dotenv
 rich
 pydantic #helps with structured tool calling
+google-generativeai
+openai

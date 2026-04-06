@@ -8,7 +8,7 @@ def add_to_history(role: str, content: str):
 
 def get_history():
     """Return current conversation history"""
-    return conversation_history
+    return conversation_history.copy()
 
 def clear_history():
     """Clear conversation history"""
