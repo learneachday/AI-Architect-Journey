@@ -1,0 +1,5 @@
+AI Architect in 2026:
+- Main responsibilities: Design end-to-end AI systems, choose models, orchestrate agents, implement RAG pipelines, manage cost and latency.
+- Key skills: Prompt engineering, RAG, Agentic workflows, MLOps/LLMOps, AI governance (TRiSM), evaluation & observability.
+- Important trends: GraphRAG, Multi-agent systems, Small Language Models (SLMs), Tiered inference routing.
+- Production challenges: Hallucinations, high inference cost, data privacy, prompt injection, monitoring drift.
