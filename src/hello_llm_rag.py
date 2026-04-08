@@ -3,11 +3,11 @@ from dotenv import load_dotenv
 from rich.console import Console
 from huggingface_hub import InferenceClient
 
-# Updated RAG imports
-from langchain_community.document_loaders import TextLoader
+# RAG imports
+from langchain_community.document_loaders import TextLoader, PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEmbeddings   # ← Updated import
+from langchain_huggingface import HuggingFaceEmbeddings
 
 load_dotenv()
 
@@ -24,22 +24,36 @@ client = InferenceClient(
     api_key=hf_token,
 )
 
-# ====================== BASIC RAG SETUP ======================
-console.print("[dim]Loading documents and building vector store...[/dim]")
+# ====================== IMPROVED RAG SETUP ======================
+console.print("[dim]Building improved RAG system with metadata...[/dim]")
 
-# Load document
+# Load documents (supports both .txt and .pdf)
 loader = TextLoader("data/ai_architect_notes.txt", encoding="utf-8")
+# If you want to load PDF, use this instead:
+# loader = PyPDFLoader("data/your_file.pdf")
+
 documents = loader.load()
 
-# Split document into smaller chunks
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+# Improved chunking strategy
+text_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=600,
+    chunk_overlap=100,          # Increased overlap for better context
+    separators=["\n\n", "\n", ".", "!", "?"]
+)
+
 chunks = text_splitter.split_documents(documents)
+
+# Add metadata to each chunk
+for i, chunk in enumerate(chunks):
+    chunk.metadata["chunk_id"] = i
+    chunk.metadata["source"] = "ai_architect_notes.txt"
+    chunk.metadata["chunk_size"] = len(chunk.page_content)
 
 # Create embeddings and vector store
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 vectorstore = FAISS.from_documents(chunks, embeddings)
 
-console.print(f"[dim]RAG system ready! Loaded {len(chunks)} document chunks.[/dim]")
+console.print(f"[dim]RAG Ready! Created {len(chunks)} chunks with metadata.[/dim]")
 
 # ====================== MEMORY ======================
 from utils.memory import add_to_history, get_history, clear_history
@@ -50,24 +64,31 @@ def chat_with_llm(user_input: str):
 
         console.print("\n[bold green]AI is thinking...[/bold green]")
 
-        # Retrieval: Find most relevant chunks
-        relevant_docs = vectorstore.similarity_search(user_input, k=3)
-        context = "\n\n".join([doc.page_content for doc in relevant_docs])
+        # === RETRIEVAL ===
+        relevant_docs = vectorstore.similarity_search(user_input, k=4)
 
-        # Augmented prompt
-        augmented_prompt = f"""Use only the following context to answer the question.
-If the answer is not in the context, say "I don't have enough information from the provided documents."
+        # Log what was retrieved (very useful for debugging)
+        console.print("[dim]Retrieved chunks:[/dim]")
+        for i, doc in enumerate(relevant_docs):
+            console.print(f"[dim]  Chunk {i+1} | Source: {doc.metadata['source']} | Score preview: ...[/dim]")
+
+        context = "\n\n".join([f"Source: {doc.metadata['source']}\n{doc.page_content}" 
+                              for doc in relevant_docs])
+
+        # Better RAG Prompt (Production style)
+        prompt = f"""You are an expert AI Architect assistant. Answer the question using ONLY the provided context.
+If the answer is not in the context, clearly say "I don't have sufficient information in the documents."
 
 Context:
 {context}
 
 Question: {user_input}
 
-Answer:"""
+Answer in a clear, professional manner. Mention the source when possible."""
 
         messages = [
-            {"role": "system", "content": "You are a helpful AI Architect assistant."},
-            {"role": "user", "content": augmented_prompt}
+            {"role": "system", "content": "You are a helpful, truthful AI Architect assistant."},
+            {"role": "user", "content": prompt}
         ]
 
         # Streaming response
@@ -75,7 +96,7 @@ Answer:"""
         full_text = ""
         for token in client.chat.completions.create(
             messages=messages,
-            max_tokens=700,
+            max_tokens=800,
             temperature=0.6,
             stream=True,
         ):
@@ -93,20 +114,20 @@ Answer:"""
 
 
 if __name__ == "__main__":
-    console.print("[bold blue]=== AI Architect Journey - Day 6 (RAG Fixed) ===[/bold blue]")
-    console.print("[dim]Basic RAG with updated HuggingFaceEmbeddings[/dim]\n")
+    console.print("[bold blue]=== AI Architect Journey - Day 7 ===[/bold blue]")
+    console.print("[dim]Improved RAG: Metadata + Source Citations + Better Chunking + Retrieval Logging[/dim]\n")
     
-    console.print("[yellow]Ask questions about the document[/yellow]:")
+    console.print("Test these questions:")
     console.print("1. What are the main responsibilities of an AI Architect?")
-    console.print("2. What are the key trends in 2026?")
-    console.print("3. What are the biggest challenges?")
+    console.print("2. Why is chunk overlap important?")
+    console.print("3. What are the key trends in 2026?")
     console.print("4. Clear (reset history)\n")
 
     while True:
         user_input = console.input("\n[bold yellow]You:[/bold yellow] ").strip()
         
         if user_input.lower() in ["exit", "quit", "bye"]:
-            console.print("[cyan]Goodbye! See you for Day 7.[/cyan]")
+            console.print("[cyan]Goodbye! See you for Day 8.[/cyan]")
             break
             
         if user_input.lower() == "clear":

@@ -1,5 +1,8 @@
-AI Architect in 2026:
-- Main responsibilities: Design end-to-end AI systems, choose models, orchestrate agents, implement RAG pipelines, manage cost and latency.
-- Key skills: Prompt engineering, RAG, Agentic workflows, MLOps/LLMOps, AI governance (TRiSM), evaluation & observability.
-- Important trends: GraphRAG, Multi-agent systems, Small Language Models (SLMs), Tiered inference routing.
-- Production challenges: Hallucinations, high inference cost, data privacy, prompt injection, monitoring drift.
+AI Architect Responsibilities:
+The AI Architect is responsible for designing end-to-end AI systems. They must choose the right models, design RAG pipelines, and implement multi-agent orchestration. One of the most critical skills is creating effective retrieval strategies using chunking and overlap.
+
+Importance of Chunk Overlap:
+Chunk overlap is very important in RAG systems. Without proper overlap, important context can be lost at chunk boundaries. For example, if a sentence is split between two chunks, the model may not understand the full meaning. Using 50 to 100 characters of overlap significantly improves retrieval quality and reduces hallucinations.
+
+Key Trends in 2026:
+GraphRAG, Agentic workflows, SLMs, and proper evaluation frameworks are the biggest trends this year.
