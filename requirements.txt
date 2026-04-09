@@ -9,4 +9,5 @@ langchain-community
 langchain-huggingface
 faiss-cpu
 pypdf
+flagembedding
 
